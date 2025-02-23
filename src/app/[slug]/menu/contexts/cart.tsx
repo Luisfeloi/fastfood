@@ -11,13 +11,15 @@ export interface ICartContext {
   products: CartProduct[];
   toggleCart: () => void;
   addProduct: (product: CartProduct) => void;
+  decreaseProductQuantity: (productId: string) => void;
 }
 
 export const CartContext = createContext<ICartContext>({
   isOpen: false,
   products: [],
   toggleCart: () => { },
-  addProduct: () => { }
+  addProduct: () => { },
+  decreaseProductQuantity: () => { }
 })
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
@@ -32,7 +34,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const productIsAlreadyOnTheCart = products.some((prevProduct) => prevProduct.id === product.id)
 
     if (!productIsAlreadyOnTheCart) {
-      return setProducts((prev) => [...prev, product])
+      return setProducts((prev) => [...prev, product]);
     }
 
     setProducts(prevProducts => {
@@ -41,11 +43,28 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           return {
             ...prevProducts,
             quantity: prevProducts.quantity + product.quantity
-          }
+          };
         }
         return prevProducts;
-      })
-    })
+      });
+    });
+  };
+
+  const decreaseProductQuantity = (productId: string) => {
+    setProducts(prevProducts => {
+      return prevProducts.map((prevProducts) => {
+        if (prevProducts.id === productId) {
+          if (prevProducts.quantity === 1) {
+            return prevProducts
+          }
+          return {
+            ...prevProducts,
+            quantity: prevProducts.quantity - 1
+          };
+        }
+        return prevProducts;
+      });
+    });
   }
 
   return (
@@ -55,6 +74,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         products,
         toggleCart,
         addProduct,
+        decreaseProductQuantity,
       }}>
       {children}
     </CartContext.Provider>
